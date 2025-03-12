@@ -1,5 +1,5 @@
 from langgraph.graph import StateGraph, END, START
-from agent.utils.state import InformationResearcher, Document, Query
+from agent.utils.state import ResearchState, InformationResearcher, Document, Query
 from agent.utils.node import (
     create_queries,
     investigate_queries,
@@ -9,8 +9,8 @@ from agent.utils.node import (
 
 
 def run_graph():
-    initial_state = (
-        InformationResearcher(
+    initial_state = ResearchState(
+        researcher=InformationResearcher(
             theme="""
             Celulares de gama media-alta, los cuales tengan una buena relación calidad-precio.
             """,
@@ -18,18 +18,15 @@ def run_graph():
             number_queries=5,
             info_documento="",
         ),
-        Document(
+        document=Document(
             title="",
             introduction="",
             body="",
             conclusion="",
         ),
-        Query(
-            queries=[],
-        ),
     )
 
-    graph_builder = StateGraph(InformationResearcher)
+    graph_builder = StateGraph(ResearchState)
     graph_builder.add_node("create_queries", create_queries)
     graph_builder.add_node("investigate_queries", investigate_queries)
     graph_builder.add_node("create_report", create_report)

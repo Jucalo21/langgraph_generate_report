@@ -1,5 +1,5 @@
 from agent.utils.tools import definir_llm, tavily_search
-from docx import Document
+from docx import Document as DocxDocument
 from dotenv import load_dotenv
 from agent.utils.state import InformationResearcher, Document, Query
 import os, json
@@ -7,7 +7,7 @@ import os, json
 load_dotenv()
 
 
-def create_queries(state: InformationResearcher) -> InformationResearcher:
+def create_queries(state: InformationResearcher):
     client = definir_llm()
 
     prompt = f"""
@@ -30,11 +30,12 @@ def create_queries(state: InformationResearcher) -> InformationResearcher:
     )
 
     parsed = json.loads(response.text)
+    state["queries"] = Query(queries=parsed.get("queries", []))
 
-    state["queries"] = parsed.get("queries", "")
+    return state
 
 
-def investigate_queries(state: InformationResearcher) -> InformationResearcher:
+def investigate_queries(state: InformationResearcher):
     query_list = state["queries"].queries
 
     info_acumulada = ""
@@ -90,7 +91,7 @@ def create_report(state: InformationResearcher) -> Document:
 def create_document(state: Document) -> None:
 
     # Crear un nuevo documento de word
-    doc = Document()
+    doc = DocxDocument()
 
     # Agregar el titulo
     doc.add_heading(state.title, level=1)
@@ -106,5 +107,5 @@ def create_document(state: Document) -> None:
 
     # Guardar el documento
     doc.save("output/reporte.docx")
-
-    return print("Documento generado")
+    print("Documento Generado")
+    return state

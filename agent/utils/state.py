@@ -36,3 +36,12 @@ class Document(BaseModel):
     conclusion: str = Field(
         description="Conclusion del documento, teniendo en cuenta la tematica de la investigación."
     )
+
+
+class ResearchState(BaseModel):
+    researcher: InformationResearcher = Field(
+        description="Información de la investigación"
+    )
+    document: Document = Field(
+        description="Información del documento",
+    )
