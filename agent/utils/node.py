@@ -1,13 +1,13 @@
 from agent.utils.tools import definir_llm, tavily_search
 from docx import Document as DocxDocument
 from dotenv import load_dotenv
-from agent.utils.state import InformationResearcher, Document, Query
+from agent.utils.state import ResearchState, InformationResearcher, Document, Query
 import os, json
 
 load_dotenv()
 
 
-def create_queries(state: InformationResearcher):
+def create_queries(state: ResearchState):
     client = definir_llm()
 
     prompt = f"""
@@ -15,9 +15,9 @@ def create_queries(state: InformationResearcher):
     Solo vas a entregar las consultas ni más ni menos.
 
     Tematica:
-    <theme>{state['theme']}</theme>
+    <theme>{state.researcher.theme}</theme>
     Numero de consultas:
-    <number_queries>{state['number_queries']}</number_queries>
+    <number_queries>{state.researcher.number_queries}</number_queries>
     """
 
     response = client.models.generate_content(
@@ -30,40 +30,33 @@ def create_queries(state: InformationResearcher):
     )
 
     parsed = json.loads(response.text)
-    state["queries"] = Query(queries=parsed.get("queries", []))
+    state.researcher.queries = Query(queries=parsed.get("queries", []))
 
     return state
 
 
-def investigate_queries(state: InformationResearcher):
-    query_list = state["queries"].queries
+def investigate_queries(state: ResearchState):
+    query_list = state.researcher.queries.queries
 
     info_acumulada = ""
     for query in query_list:
         result = tavily_search(query)
 
         info_acumulada += result.get("summary", "") + "\n"
-    state["info_documento"] = info_acumulada.strip()
-
-    print(
-        f"""
-    La información acumulada es:
-    {state['info_documento']}
-    """
-    )
+    state.researcher.info_documento = info_acumulada.strip()
     return state
 
 
-def create_report(state: InformationResearcher) -> Document:
+def create_report(state: ResearchState) -> Document:
 
     prompt = f"""
     Te encargaras de crear un reportebien estructurado teniendo en cuenta la información acumulada de la tematica de la investigación 
     y las partes en las que se divide dicho reporte.
 
     Tematica:
-    <theme>{state['theme']}</theme>
+    <theme>{state.researcher.theme}</theme>
     Información acumulada:
-    <info_documento>{state['info_documento']}</info_documento>
+    <info_documento>{state.researcher.info_documento}</info_documento>
     
     Partes en las que se divide el reporte:
     1. Titulo
@@ -88,22 +81,22 @@ def create_report(state: InformationResearcher) -> Document:
     return Document(**parsed)
 
 
-def create_document(state: Document) -> None:
+def create_document(state: ResearchState) -> None:
 
     # Crear un nuevo documento de word
     doc = DocxDocument()
 
     # Agregar el titulo
-    doc.add_heading(state.title, level=1)
+    doc.add_heading(state.document.title, level=1)
 
     # Agregar la introduccion
-    doc.add_paragraph(state.introduction)
+    doc.add_paragraph(state.document.introduction)
 
     # Agregar el cuerpo
-    doc.add_paragraph(state.body)
+    doc.add_paragraph(state.document.body)
 
     # Agregar la conclusion
-    doc.add_paragraph(state.conclusion)
+    doc.add_paragraph(state.document.conclusion)
 
     # Guardar el documento
     doc.save("output/reporte.docx")
