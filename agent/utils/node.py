@@ -41,8 +41,8 @@ def investigate_queries(state: ResearchState):
     info_acumulada = ""
     for query in query_list:
         result = tavily_search(query)
+        info_acumulada += result.get("content", "") + "\n"
 
-        info_acumulada += result.get("summary", "") + "\n"
     state.researcher.info_documento = info_acumulada.strip()
     return state
 

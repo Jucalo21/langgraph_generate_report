@@ -7,13 +7,23 @@ load_dotenv()
 
 
 def tavily_search(query: str) -> dict:
+    try:
+        api_key = os.getenv("TAVILY_API_KEY")
+        if not api_key:
+            raise ValueError("TAVILY_API_KEY no está configurada")
 
-    api_key = os.getenv("TAVILY_API_KEY")
-    client = TavilyClient(api_key)
+        client = TavilyClient(api_key)
+        response = client.search(query=query)
 
-    response = client.search(query=query)
+        print(response)
+        print(
+            "-----------------------------------------------------------------------------------------------------------"
+        )
+        return response
 
-    print(response)
+    except Exception as e:
+        print(f"Error al buscar sobre la consulta {query}: {str(e)}")
+        return {}
 
 
 def definir_llm():
