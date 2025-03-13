@@ -13,12 +13,13 @@ def tavily_search(query: str) -> dict:
             raise ValueError("TAVILY_API_KEY no está configurada")
 
         client = TavilyClient(api_key)
-        response = client.search(query=query)
-
-        print(response)
-        print(
-            "-----------------------------------------------------------------------------------------------------------"
+        response = client.search(
+            query=query,
+            max_results=10,
+            include_answer="advanced",
+            include_raw_content=True,
         )
+
         return response
 
     except Exception as e:

@@ -8,14 +8,12 @@ from agent.utils.node import (
 )
 
 
-def run_graph():
+def run_graph(theme: str, number_queries: int):
     initial_state = ResearchState(
         researcher=InformationResearcher(
-            theme="""
-            Celulares de gama media-alta, los cuales tengan una buena relación calidad-precio.
-            """,
+            theme=theme,
             queries=Query(queries=[]),
-            number_queries=5,
+            number_queries=number_queries,
             info_documento="",
         ),
         document=Document(

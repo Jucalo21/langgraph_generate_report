@@ -1,5 +1,5 @@
 from pydantic import BaseModel, Field
-from typing import TypedDict, List
+from typing import List
 
 
 class Query(BaseModel):
